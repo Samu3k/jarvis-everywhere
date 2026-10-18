@@ -15,6 +15,10 @@ con Home Assistant e strumenti di produttività al centro.
 
 ### [↗ Esplora il sito e prova la demo](https://samu3k.github.io/jarvis-everywhere/)
 
+**[◉ Entra nella community Discord](https://discord.gg/hpz3j5Kqje)**
+
+![JARVIS Everywhere — Jarvis On Every. Jarvis For Every.](social-preview.jpg)
+
 [La visione](#la-visione) · [Cosa esiste oggi](#cosa-esiste-oggi) · [Roadmap](#roadmap) · [Contribuire](#contribuire)
 
 <sub>Unico sviluppatore: <a href="https://github.com/Samu3k">Samu3k</a> · Nome repository: <code>jarvis-everywhere</code></sub>
@@ -56,11 +60,15 @@ Questi esempi descrivono l’obiettivo. La demo sul sito ne simula alcuni, senza
 - Tema chiaro e scuro, con pulsante sole/luna animato e preferenza ricordata nel browser.
 - Interfaccia completa in italiano e inglese, con selettore IT/EN: anche le risposte della demo cambiano lingua.
 - Avviso «Progetto in sviluppo» e indicazione dell’unico sviluppatore nella prima schermata.
-- Piantina interattiva di quattro stanze e selezione dell’ambiente.
-- Demo testuale con comandi rapidi per clima, musica, bozze email e stato Home Assistant.
-- Stato indipendente per stanza durante la visita e scenari «Serata relax» e «Modalità lavoro».
+- Quattro ambienti illustrati e interattivi: salotto, cucina, studio e camera.
+- Playground con comandi rapidi per clima, luci, musica, bozze email e stato della casa.
+- Stato indipendente per stanza e scenari «Serata relax», «Concentrazione» e «Buonanotte».
+- Controlli per la temperatura e interruttore delle luci nella dashboard simulata.
 - Animazioni della forma d’onda, comparsa delle sezioni e supporto a `prefers-reduced-motion`.
-- Visione, architettura proposta, roadmap e FAQ.
+- Storia del progetto, architettura esplorabile, diario dei progressi e roadmap interattiva.
+- Compositore di idee: prepara una proposta, copiala oppure apri una issue GitHub precompilata, da rivedere e pubblicare personalmente.
+- Collegamenti al server Discord, favicon e immagine di condivisione.
+- Un piccolo Easter egg: prova a chiedere «Chi ti ha creato?».
 
 La demo riconosce parole chiave italiane e inglesi e scenari predefiniti: **non è un modello AI**. Non usa il microfono, non riproduce musica, non controlla dispositivi e non invia email. I comandi e lo stato restano nella memoria della pagina e si azzerano ricaricandola. Solo tema e lingua vengono salvati in `localStorage`, quando disponibile. Il font viene richiesto a Google Fonts; le icone sono incorporate nel file.
 
@@ -68,12 +76,15 @@ La demo riconosce parole chiave italiane e inglesi e scenari predefiniti: **non 
 
 ```text
 Hei Jarvis, imposta il clima a 24 gradi in cucina
+Accendi le luci in salotto
 Metti musica in salotto
 Ferma la musica in salotto
 Scrivi una bozza email in studio
 Stato Home Assistant
 Hei Jarvis, serata relax in camera
 Hei Jarvis, modalità lavoro in studio
+Hei Jarvis, buonanotte in camera
+Chi ti ha creato?
 
 Hey Jarvis, set the climate to 24 degrees in the kitchen
 Play music in the living room
@@ -114,6 +125,8 @@ Questo è uno schema di progetto, non uno stack già implementato. Restano da sc
 - [x] Scrivere la documentazione iniziale.
 - [x] Creare la repository e preparare i file per GitHub Pages.
 - [x] Aggiungere temi chiaro/scuro e traduzione italiano/inglese.
+- [x] Pubblicare il playground con luci, scenari e ambienti illustrati.
+- [x] Collegare la community Discord e il compositore di proposte.
 
 ### 02 — Primo prototipo reale
 
@@ -137,13 +150,15 @@ La roadmap è indicativa e non promette date di rilascio.
 
 Scarica la repository e apri `index.html` nel browser. Non sono necessari installazione, compilazione, chiavi API o un server. Se Google Fonts non è disponibile, viene usato il font di sistema.
 
-## Pubblicare il sito su GitHub Pages
+## Sito e pubblicazione
 
-1. Crea una repository chiamata **`jarvis-everywhere`** nell’account **`Samu3k`**. Per usare Pages con GitHub Free, scegli una repository pubblica.
-2. Carica `index.html` e questo `README.md` nella cartella principale del branch `main`.
-3. Apri **Settings → Pages** e seleziona **Deploy from a branch**.
-4. Scegli **`main`** e **`/ (root)`**, quindi salva.
-5. Attendi il completamento della pubblicazione e apri **[il sito JARVIS](https://samu3k.github.io/jarvis-everywhere/)**.
+Il sito usa GitHub Pages, con origine **`main` → `/ (root)`**.
+
+1. Modifica `index.html` per aggiornare testi, stile o interazioni.
+2. Mantieni `favicon.svg` e `social-preview.jpg` nella cartella principale insieme al README.
+3. Salva le modifiche sul branch `main`.
+4. Attendi il completamento della pubblicazione di GitHub Pages.
+5. Apri **[il sito JARVIS](https://samu3k.github.io/jarvis-everywhere/)** e verifica il risultato.
 
 Riferimento: [documentazione ufficiale di GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site).
 
@@ -153,22 +168,27 @@ Riferimento: [documentazione ufficiale di GitHub Pages](https://docs.github.com/
 | --- | --- |
 | Repository | https://github.com/Samu3k/jarvis-everywhere |
 | Sito | https://samu3k.github.io/jarvis-everywhere/ |
-| Demo | https://samu3k.github.io/jarvis-everywhere/#demo |
-| Roadmap sul sito | https://samu3k.github.io/jarvis-everywhere/#roadmap |
+| Playground | https://samu3k.github.io/jarvis-everywhere/#playground |
+| Diario e roadmap | https://samu3k.github.io/jarvis-everywhere/#journal |
+| Discord | https://discord.gg/hpz3j5Kqje |
 
-Se scegli un nome diverso, aggiorna `GITHUB_URL` e gli attributi `href` dei link `data-repository` in `index.html`, poi i collegamenti in questo README. Gli `href` espliciti mantengono i link disponibili anche con JavaScript disattivato.
+Gli indirizzi `REPOSITORY` e `DISCORD_URL` si trovano nello script integrato in `index.html`. Quando cambi un indirizzo, aggiorna anche gli `href` espliciti e i collegamenti in questo README. Per una nuova destinazione del sito, aggiorna inoltre canonical e metadati Open Graph.
 
 ## Struttura iniziale
 
 ```text
 jarvis-everywhere/
-├── index.html    # Landing page, stile e demo interattiva
-└── README.md     # Visione, stato del progetto e collegamento al sito
+├── index.html          # Landing page, stile e playground interattivo
+├── favicon.svg         # Icona vettoriale del progetto
+├── social-preview.jpg  # Immagine di condivisione
+└── README.md           # Visione, stato e collegamenti del progetto
 ```
 
 ## Contribuire
 
 Sono benvenuti casi d’uso, test della demo, miglioramenti di accessibilità e proposte sulle integrazioni.
+
+**[Entra nel Discord di JARVIS Everywhere](https://discord.gg/hpz3j5Kqje)** per consigli, idee e confronto sul progetto. Per proposte da seguire nel tempo, usa le [issue GitHub](https://github.com/Samu3k/jarvis-everywhere/issues) oppure il compositore disponibile sul sito.
 
 - Apri una issue descrivendo il problema o lo scenario che immagini.
 - Per modifiche ampie, discuti prima l’approccio in una issue.
