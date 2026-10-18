@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12181B">
+  <meta name="description" content="JARVIS: l'assistente vocale e domotico open-source per Home Assistant e la tua produttività. Scopri il progetto e prova la demo interattiva.">
+  <title>JARVIS — Jarvis On Every. Jarvis For Every.</title>
+  <script>
+    // Applica il tema prima del primo disegno, anche se lo storage è bloccato.
+    try { document.documentElement.dataset.theme = localStorage.getItem('jarvis-theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }
+    catch { document.documentElement.dataset.theme = 'dark'; }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* Palette e impostazioni condivise. Nessuna dipendenza JavaScript. */
+    :root{color-scheme:dark;--bg:#12181B;--panel:#1B2327;--mint:#00F2C3;--green:#10B981;--cyan:#00D2FF;--blue:#38BDF8;--text:#F2F6F7;--muted:#A3B1B8;--line:rgba(185,217,228,.12);--gradient:linear-gradient(110deg,var(--mint),var(--cyan))}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:30px}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+    body::before{content:"";position:absolute;z-index:-1;inset:0 0 auto;height:1050px;pointer-events:none;background:radial-gradient(ellipse at 80% 38%,#00d2ff0b,transparent 52%),radial-gradient(ellipse at 24% 25%,#00f2c30a,transparent 55%)}
+    a{color:inherit;text-decoration:none}button,input{font:inherit}button,a{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:disabled{cursor:wait;opacity:.6}
+    button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:5px}::selection{background:#00f2c33d}
+    .wrap{width:min(1180px,calc(100% - 64px));margin:auto}.skip{position:fixed;top:-100px;left:20px;z-index:10;padding:12px;background:var(--panel)}.skip:focus{top:10px}
+    .icon{width:19px;height:19px;display:inline-block;vertical-align:middle;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .github-icon{fill:currentColor;stroke:none}.row,.brand,.button,.badge{display:flex;align-items:center}.row{gap:12px}.brand{gap:11px;font-size:20px;font-weight:800;letter-spacing:3px}
+    .mark{width:30px;height:30px;border:2px solid var(--mint);border-right-color:var(--cyan);border-radius:50%;position:relative;box-shadow:0 0 20px #00f2c316}
+    .mark::after{content:"";position:absolute;inset:6px;border:1px solid var(--cyan);border-radius:50%}.mark::before{content:"";position:absolute;inset:11px;background:var(--mint);border-radius:50%}
+    header{height:98px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+    .badge{width:fit-content;gap:8px;border:1px solid #00f2c32a;border-radius:99px;background:#00f2c307;color:var(--mint);padding:6px 11px;font-size:10px;font-weight:600;letter-spacing:.5px}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 10px #00f2c366;flex-shrink:0}.coming .dot{animation:pulse 2.5s infinite}.coming{color:#B8EADC;text-transform:none;letter-spacing:.1px}
+    .nav-link{gap:9px;border:1px solid var(--line);border-radius:99px;padding:9px 16px;font-size:12px;background:#ffffff03;transition:border-color .2s,background .2s}.nav-link:hover{border-color:var(--cyan);background:#00d2ff0b}
+    .hero{text-align:center;padding:76px 0 44px}.eyebrow{margin:0 auto 25px;font-size:10px;letter-spacing:1.6px;padding:8px 14px;color:#B8C8CD;background:#1b2327}
+    .eyebrow .dot{margin-right:3px}.hero h1{font-size:clamp(42px,5.9vw,76px);font-weight:800;line-height:1.09;letter-spacing:-4px;margin:0 0 25px}.gradient{background:var(--gradient);background-clip:text;-webkit-background-clip:text;color:transparent}
+    .hero p{color:var(--muted);max-width:650px;margin:0 auto;font-size:15px;line-height:1.9}.hero p strong{color:#D8E2E6;font-weight:500}
+    .actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin:30px 0 21px}.button{justify-content:center;gap:10px;border-radius:99px;padding:13px 21px;font-size:12px;font-weight:600;border:1px solid transparent;transition:transform .2s,box-shadow .2s}
+    .button:hover{transform:translateY(-2px)}.primary{background:var(--gradient);color:#08282A;box-shadow:0 4px 30px #00f2c312}.primary:hover{box-shadow:0 4px 36px #00f2c32b}.secondary{background:var(--panel);border-color:#38bdf84a;color:#DFE8EC}
+    .micro{font-size:10px;color:#8FA0A7;display:flex;justify-content:center;gap:17px}.micro span{display:flex;align-items:center;gap:5px}.micro .icon{width:12px;height:12px;color:var(--green)}
+    .demo-section{padding:18px 0 60px}.section-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.section-top h2{font-size:14px;letter-spacing:-.2px;font-weight:600;margin:0}.section-top p{margin:0;font-size:10px;color:var(--muted)}.section-top .index{color:var(--mint);margin-right:9px;font-size:10px}
+    .dashboard{display:grid;grid-template-columns:205px 1fr;border:1px solid #9ccad52a;border-radius:22px;overflow:hidden;box-shadow:0 30px 95px #0004,0 0 70px #00d2ff05;background:linear-gradient(125deg,#1B2327,#171F23)}
+    .sidebar{padding:24px 16px 19px;border-right:1px solid var(--line);background:#12181b55;display:flex;flex-direction:column}.sidebar .brand{font-size:13px;letter-spacing:2px;margin:0 8px 30px}.sidebar .mark{width:23px;height:23px}.sidebar .mark::after{inset:4px}.sidebar .mark::before{inset:8px}
+    .side-label{font-size:9px;letter-spacing:1.4px;color:#84969E;margin:0 11px 12px}.side-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;font-size:11px;color:#93A5AD;margin-bottom:5px}.side-item .icon{width:16px;height:16px}.side-item.active{background:linear-gradient(90deg,#00f2c316,#00d2ff08);color:var(--mint);border:1px solid #00f2c319}
+    .side-bottom{margin-top:auto;padding:15px 10px 0;font-size:9px;color:#91A2AA}.side-bottom .row{gap:7px;margin-bottom:4px;color:#BED3D7}.side-bottom .dot{width:5px;height:5px}
+    .workspace{padding:23px 27px 21px;min-width:0}.dashboard-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px}.dashboard-top h3{font-size:16px;font-weight:600;margin:0;letter-spacing:-.5px}.dashboard-top p{font-size:10px;color:var(--muted);margin:3px 0 0}.preview-label{color:#9CAEB6;font-size:9px;letter-spacing:1px;border:1px solid var(--line);padding:5px 8px;border-radius:6px}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.metric{border:1px solid var(--line);background:linear-gradient(130deg,#26313780,#1b232740);padding:14px 15px;border-radius:13px}.metric-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:10px}.metric-top .icon{width:15px;height:15px;color:var(--mint)}.metric strong{font-size:21px;font-weight:600;display:block;margin-top:6px;letter-spacing:-.8px}.metric small{font-size:9px;color:#92A6AD}.metric small.on{color:var(--mint)}
+    .assistant{margin-top:16px;border:1px solid var(--line);border-radius:14px;background:#12181b65;padding:18px}.assistant-top{display:flex;justify-content:space-between;align-items:center;gap:10px}.assistant-title{font-size:11px;font-weight:600}.assistant-title .icon{color:var(--mint);margin-right:6px;width:15px;height:15px}.status{display:flex;align-items:center;gap:6px;color:var(--mint);font-size:9px}
+    .audio{height:64px;display:flex;justify-content:center;align-items:center;gap:4px;margin:2px 0}.audio span{height:var(--h);width:3px;border-radius:8px;background:var(--gradient);opacity:.8;transform:scaleY(.4);transition:transform .3s}.audio.is-active span{animation:wave .65s ease-in-out infinite alternate;animation-delay:var(--d)}
+    .conversation{max-height:245px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#35535c transparent;display:flex;flex-direction:column;gap:10px;padding:0 2px 4px}.message{max-width:94%;margin:0;border-radius:11px;padding:10px 13px;font-size:11px;line-height:1.7;animation:appear .25s ease-out;white-space:pre-wrap;overflow-wrap:anywhere}.message.jarvis{background:#233036;border:1px solid #36515966;color:#DAE8ED;align-self:flex-start}.message.user{align-self:flex-end;background:#00d2ff10;border:1px solid #00d2ff26;color:#CBF4F7}.message b{display:block;color:var(--mint);font-size:9px;margin-bottom:3px;font-weight:500}
+    .quick-title{font-size:9px;color:#91A2AA;margin:16px 0 8px}.quick-commands{display:flex;flex-wrap:wrap;gap:7px}.quick{display:flex;align-items:center;gap:6px;border:1px solid #c1e5ef1a;border-radius:8px;background:#1e292e;color:#C7D5DB;font-size:9px;padding:8px 10px;transition:border-color .2s,background .2s}.quick:hover{border-color:#00f2c366;background:#00f2c30b}.quick .icon{width:12px;height:12px;color:var(--mint)}
+    .command-form{display:flex;gap:10px;margin-top:13px;background:#11191D;border:1px solid #c1e5ef22;border-radius:10px;padding:6px 6px 6px 12px}.command-form:focus-within{border-color:var(--cyan)}.command-form input{min-width:0;flex:1;border:0;background:transparent;color:var(--text);font-size:11px;outline:none}.command-form input::placeholder{color:#83979F}.send{display:grid;place-items:center;border:0;border-radius:7px;width:32px;height:31px;background:var(--gradient);color:#103035}.send .icon{width:16px;height:16px}.demo-note{text-align:center;font-size:9px;color:#98A9B1;margin:13px 0 0}
+    .principles{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:27px}.principle{display:flex;align-items:flex-start;gap:11px}.principle>.icon{color:var(--mint);margin-top:2px;width:17px;height:17px}.principle h3{font-size:11px;font-weight:600;margin:0 0 4px}.principle p{font-size:10px;color:var(--muted);margin:0;line-height:1.8}
+    footer{border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:20px;padding:25px 0 30px;font-size:10px;color:#91A2AA}footer .row{gap:20px}footer a:hover{color:var(--mint)}.footer-brand{font-weight:600;letter-spacing:.3px;color:#C8D7DD}.footer-brand span{font-weight:400;color:#91A2AA;letter-spacing:0}
+    @keyframes pulse{50%{box-shadow:0 0 0 5px #00f2c310}}@keyframes wave{from{transform:scaleY(.35);opacity:.5}to{transform:scaleY(1);opacity:1}}@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    @media(min-width:1500px){.hero{padding-top:96px;padding-bottom:60px}.demo-section{padding-bottom:80px}}
+    @media(max-width:800px){.wrap{width:calc(100% - 40px)}.sidebar{display:none}.dashboard{grid-template-columns:1fr}.hero{padding-top:60px}.hero h1{letter-spacing:-2.8px}.workspace{padding:21px}.principles{gap:18px}.coming{font-size:9px}.brand{font-size:17px;letter-spacing:2px}}
+    @media(max-width:520px){header{height:80px}.wrap{width:calc(100% - 32px)}header>.row{gap:10px}.brand{font-size:15px;gap:8px}.mark{width:25px;height:25px}.mark::after{inset:5px}.mark::before{inset:9px}.nav-link{font-size:0;padding:9px}.nav-link .icon{width:18px;height:18px}.coming{padding:5px 8px;font-size:8px}.hero{padding:47px 0 30px}.eyebrow{font-size:8px;letter-spacing:1px}.hero h1{font-size:42px;letter-spacing:-2.3px}.hero p{font-size:13px}.actions{flex-direction:column;align-items:stretch;padding:0 8px;gap:10px;margin-top:26px}.button{padding:13px 16px}.micro{font-size:9px;gap:12px}.section-top{align-items:flex-start}.section-top h2{font-size:12px}.section-top p{font-size:8px;max-width:125px;text-align:right}.workspace{padding:16px 12px}.dashboard-top h3{font-size:15px}.metrics{gap:7px}.metric{padding:10px 8px}.metric-top{font-size:8px}.metric-top .icon{width:12px;height:12px}.metric strong{font-size:18px}.metric small{font-size:8px}.assistant{padding:13px 10px}.message{max-width:100%}.quick{font-size:9px;padding:8px}.principles{grid-template-columns:1fr;gap:18px;margin-top:25px}.principle p{font-size:11px}.principle h3{font-size:12px}.demo-section{padding-bottom:35px}footer{align-items:flex-start;flex-direction:column;gap:13px}footer .row{width:100%;justify-content:space-between}.preview-label{font-size:8px}}
+    /* Seconda versione: movimento ambientale e sezioni narrative. */
+    body{overflow-x:clip}header{position:relative;z-index:3}.nav-sections{display:flex;gap:23px;font-size:11px;color:var(--muted)}.nav-sections a:hover{color:var(--mint)}
+    .scroll-progress{position:fixed;inset:0 auto auto 0;height:2px;width:0;background:var(--gradient);z-index:20;box-shadow:0 0 15px var(--mint)}
+    .hero{position:relative;padding-top:65px}.hero h1{position:relative;z-index:1}.hero h1 .gradient{background-size:200% 100%;animation:gradient-flow 8s ease-in-out infinite alternate}
+    .hero-orbit{width:180px;height:140px;position:relative;margin:0 auto 23px;display:grid;place-items:center;isolation:isolate}.hero-orbit::before{content:"";position:absolute;inset:0 -40px;background:radial-gradient(ellipse,#00f2c31b,transparent 68%);filter:blur(12px);animation:breathe 4s ease-in-out infinite}
+    .orb{width:82px;height:82px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#c1fff0,#00f2c3 7%,#00a799 28%,#104a5c 53%,#10282e 70%);box-shadow:inset -8px -8px 20px #08191f,0 0 35px #00f2c32a;position:relative;animation:float 6s ease-in-out infinite}
+    .orb::before{content:"";position:absolute;inset:9px;border-radius:50%;border:1px solid #c3fff52e;box-shadow:inset 0 0 16px #00d2ff29}.orb::after{content:"";position:absolute;inset:33px;border-radius:50%;background:#d4fff3;box-shadow:0 0 14px 4px var(--mint)}
+    .orbit-ring{position:absolute;width:160px;height:160px;border:1px solid #00d2ff28;border-radius:50%;transform:rotateX(63deg) rotate(-25deg);animation:orbit 14s linear infinite}.orbit-ring::before{content:"";position:absolute;width:6px;height:6px;background:var(--mint);border-radius:50%;top:19px;left:19px;box-shadow:0 0 12px var(--mint)}.orbit-ring.two{width:125px;height:125px;transform:rotateY(60deg) rotate(25deg);animation:orbit-two 19s linear infinite;border-color:#00f2c32e}
+    .wake-caption{display:block;font-family:monospace;font-size:10px;letter-spacing:2px;color:#A6C5CC;margin:0 auto 18px}.wake-caption::after{content:"";display:inline-block;background:var(--mint);width:5px;height:11px;margin-left:6px;vertical-align:-1px;animation:blink 1s steps(2) infinite}
+    .signal-strip{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:15px;margin:28px auto 4px;color:#9CB1B9;font-size:9px;letter-spacing:1px}.signal-strip span{display:flex;align-items:center;gap:7px}.signal-strip .icon{width:14px;height:14px;color:var(--mint)}.signal-strip i{width:30px;height:1px;background:linear-gradient(90deg,#00f2c355,#00d2ff22)}
+    .content-section{padding:72px 0;border-top:1px solid var(--line)}.section-kicker{color:var(--mint);font-size:10px;font-weight:600;letter-spacing:1.7px;margin:0 0 14px}.section-heading{font-size:clamp(29px,3.6vw,44px);line-height:1.2;letter-spacing:-1.8px;font-weight:700;margin:0 0 17px}.section-copy{font-size:13px;color:var(--muted);max-width:580px;margin:0;line-height:1.9}.section-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:30px}.section-intro .section-copy{max-width:340px}
+    .room-layout{display:grid;grid-template-columns:1.1fr 1fr;gap:20px}.house-scene{position:relative;min-height:370px;border:1px solid var(--line);border-radius:22px;background:radial-gradient(ellipse at 50% 50%,#00f2c30a,transparent 70%),linear-gradient(140deg,#1b2327,#151e22);padding:27px;overflow:hidden}.scene-label{font-size:9px;color:#8199A3;letter-spacing:1px;display:flex;justify-content:space-between}.floorplan{width:270px;height:215px;display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative;margin:30px auto 20px;transform:perspective(800px) rotateX(22deg) rotateZ(-10deg)}
+    .floor-room{background:linear-gradient(140deg,#28363b,#19262b);border:1px solid #74929d55;border-bottom:5px solid #32464f;border-radius:10px;padding:15px;color:#A8BEC7;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;font-size:11px;text-align:left;transition:background .4s,border-color .4s,box-shadow .4s,transform .4s;position:relative}.floor-room .icon{width:23px;height:23px}.floor-room[aria-pressed="true"]{background:linear-gradient(130deg,#00f2c322,#00d2ff12);border-color:#00f2c399;color:#AEFFEA;box-shadow:0 0 35px #00f2c316;transform:translateY(-5px)}.floor-room[aria-pressed="true"]::after{content:"";width:7px;height:7px;background:var(--mint);box-shadow:0 0 12px var(--mint);border-radius:50%;position:absolute;right:12px;top:13px;animation:pulse 2s infinite}
+    .scene-note{text-align:center;font-size:9px;color:#89A3AD;margin:0}.room-story{padding:29px;background:linear-gradient(130deg,#202b30,#192125);border:1px solid var(--line);border-radius:22px;display:flex;flex-direction:column;justify-content:center}.room-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:26px}.room-tab{border:1px solid var(--line);border-radius:99px;color:#AFC0C8;background:transparent;padding:6px 11px;font-size:10px}.room-tab[aria-pressed="true"]{background:#00f2c312;border-color:#00f2c355;color:var(--mint)}.room-story h3{font-size:25px;letter-spacing:-1px;margin:0 0 8px}.room-story>p{font-size:12px;line-height:1.9;color:var(--muted);margin:0 0 19px}.example-command{border-left:2px solid var(--mint);padding:11px 15px;background:#00f2c307;border-radius:0 9px 9px 0;color:#DEFAF4;font-size:12px;line-height:1.7;min-height:63px;margin-bottom:18px}.room-story .button{align-self:flex-start;font-size:11px;padding:10px 16px}.room-footer{font-size:9px;color:#849EA9;margin-top:15px}
+    .demo-section{padding-top:65px}.demo-intro{margin-bottom:28px}.demo-intro .section-copy{max-width:650px}.room-context{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);margin-bottom:13px}.room-context select{background:#162126;color:#CBEEE5;border:1px solid #00f2c333;border-radius:7px;padding:6px 9px;font:inherit}.assistant{position:relative;transition:box-shadow .4s,border-color .4s}.assistant[aria-busy="true"]{box-shadow:0 0 28px #00f2c30c;border-color:#00f2c33d}.demo-tools{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}.demo-tools button{font-size:9px;color:#9CB4BE;border:0;background:transparent;padding:5px}.demo-tools button:hover{color:var(--mint)}.demo-tools .hint{font-size:9px;color:#819BA7}.message.pending{color:#94C4C8}.scenario-row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 15px}.scenario{border:1px solid #38bdf833;border-radius:99px;background:#00d2ff07;color:#C4E5F0;padding:7px 12px;font-size:10px}.scenario:hover{border-color:var(--cyan)}
+    .journey{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px}.journey-step{position:relative;border:1px solid var(--line);background:linear-gradient(135deg,#202b30,#182125);padding:24px 20px;border-radius:18px}.step-number{font-family:monospace;font-size:10px;color:var(--mint);display:block;margin-bottom:20px}.journey-step .icon{position:absolute;right:20px;top:23px;color:#54818B;width:19px;height:19px}.journey-step h3{font-size:14px;margin:0 0 9px;font-weight:600}.journey-step p{font-size:11px;color:var(--muted);line-height:1.9;margin:0}.architecture-note{margin:18px 0 0;font-size:10px;color:#90A8B2}.capabilities{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}.capability{border:1px solid var(--line);background:linear-gradient(125deg,#202b30,#172024);padding:30px;border-radius:20px}.capability .icon{color:var(--mint);width:25px;height:25px;margin-bottom:18px}.capability h3{font-size:22px;letter-spacing:-.7px;margin:0 0 10px}.capability p{font-size:12px;color:var(--muted);line-height:1.9;margin:0 0 20px}.feature-tags{display:flex;gap:6px;flex-wrap:wrap}.feature-tags span{font-size:9px;color:#B6C8D0;border:1px solid var(--line);border-radius:99px;padding:5px 10px}.mini-label{font-size:8px;letter-spacing:1px;color:var(--mint);display:block;margin-bottom:10px}
+    .roadmap{margin-top:32px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.milestone{border-top:1px solid #49717b55;padding-top:20px}.milestone .badge{font-size:8px;letter-spacing:1px}.milestone h3{font-size:17px;margin:17px 0 9px;font-weight:600;letter-spacing:-.5px}.milestone p{font-size:11px;color:var(--muted);line-height:1.9}.milestone.future .badge{color:#A3B7BF;border-color:#748e992e;background:#ffffff03}.milestone ul{list-style:none;padding:0;margin:15px 0 0;color:#ABC0C9;font-size:11px}.milestone li{padding:5px 0}.milestone li::before{content:"↳";margin-right:9px;color:#4C8C91}
+    .faq-layout{display:grid;grid-template-columns:.8fr 1.2fr;gap:70px}.faq-items details{border-bottom:1px solid var(--line);padding:19px 0}.faq-items details:first-child{padding-top:0}.faq-items summary{cursor:pointer;font-size:13px;list-style:none;display:flex;justify-content:space-between;gap:20px;color:#DAE6EB}.faq-items summary::-webkit-details-marker{display:none}.faq-items summary::after{content:"+";font-size:20px;color:var(--mint);line-height:1}.faq-items details[open] summary::after{content:"−"}.faq-items details p{font-size:12px;color:var(--muted);line-height:1.9;padding-right:25px;margin:13px 0 0}.faq-items a{color:var(--mint);text-decoration:underline;text-underline-offset:3px}
+    .join{position:relative;overflow:hidden;text-align:center;margin:10px 0 55px;border:1px solid #00f2c32a;background:radial-gradient(ellipse at 50% 110%,#00f2c318,transparent 65%),linear-gradient(120deg,#1b282d,#182226);border-radius:25px;padding:54px 25px}.join::before{content:"";position:absolute;width:300px;height:300px;border:1px solid #00d2ff0f;right:-100px;top:-140px;border-radius:50%;pointer-events:none}.join .section-copy{margin:auto;max-width:530px}.join .actions{margin-bottom:0}.join .badge{margin:0 auto 20px}.footer-links{display:flex;gap:17px;flex-wrap:wrap}footer{flex-wrap:wrap}.footer-note{width:100%;font-size:9px;color:#829BA5;margin:-6px 0 0}.back-top{position:fixed;bottom:20px;right:20px;width:38px;height:38px;background:#203239;border:1px solid #00f2c333;border-radius:50%;display:grid;place-items:center;color:var(--mint);box-shadow:0 8px 20px #0003;z-index:5;opacity:0;pointer-events:none;transition:opacity .25s}.back-top.visible{opacity:1;pointer-events:auto}.back-top .icon{transform:rotate(-90deg);width:15px;height:15px}
+    /* La pagina resta visibile anche con JavaScript disattivato. */
+    .reveal-ready .reveal{opacity:0;transform:translateY(22px);transition:opacity .75s ease,transform .75s cubic-bezier(.2,.65,.3,1)}.reveal-ready .reveal.in-view{opacity:1;transform:none}
+    @keyframes float{50%{transform:translateY(-8px)}}@keyframes breathe{50%{transform:scale(1.15);opacity:.65}}@keyframes orbit{to{transform:rotateX(63deg) rotate(335deg)}}@keyframes orbit-two{to{transform:rotateY(60deg) rotate(-335deg)}}@keyframes gradient-flow{to{background-position:100% 0}}@keyframes blink{50%{opacity:0}}
+    @media(max-width:900px){.nav-sections{gap:15px}.journey{grid-template-columns:1fr 1fr}.section-intro{align-items:flex-start;flex-direction:column;gap:0}.section-intro .section-copy{max-width:580px}.faq-layout{gap:30px}.floorplan{width:240px}.house-scene{padding:22px 15px}.room-story{padding:22px}.roadmap{gap:20px}}
+    @media(max-width:650px){.nav-sections{display:none}.room-layout,.capabilities,.faq-layout{grid-template-columns:1fr}.house-scene{min-height:340px}.floorplan{width:265px;margin-top:18px}.room-story{padding:23px}.section-heading{letter-spacing:-1px}.content-section{padding:50px 0}.hero-orbit{margin-top:-5px}.hero{padding-top:40px}.room-story h3{font-size:24px}.roadmap{grid-template-columns:1fr;gap:30px}.milestone h3{margin-top:14px}.milestone ul{display:flex;flex-wrap:wrap;column-gap:16px}.journey{gap:10px}.journey-step{padding:22px 15px}.journey-step h3{font-size:13px}.journey-step .icon{right:15px}.signal-strip{gap:9px;font-size:8px}.signal-strip i{width:15px}.demo-section{padding-top:45px}.join{padding:39px 20px}.faq-layout{gap:22px}.footer-links{gap:13px}.room-context{margin-bottom:12px}.demo-tools .hint{font-size:8px}.capability{padding:25px}.back-top{bottom:14px;right:12px}}
+    /* Controlli globali, identità del progetto e tema chiaro completo. */
+    .header-actions{display:flex;align-items:center;gap:9px}.utility-button{width:37px;height:37px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;background:#ffffff04;color:var(--text);padding:0;transition:border-color .2s,background .2s}.utility-button:hover{border-color:var(--mint);background:#00f2c30b}.utility-button .icon{width:17px;height:17px}.theme-toggle{position:relative;overflow:hidden}.theme-toggle .icon{position:absolute;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .4s}.sun-icon{opacity:0;transform:rotate(-100deg) scale(.25)}.moon-icon{opacity:1;transform:rotate(0) scale(1)}[data-theme="light"] .sun-icon{opacity:1;transform:rotate(0) scale(1)}[data-theme="light"] .moon-icon{opacity:0;transform:rotate(100deg) scale(.25)}.language-toggle{width:auto;min-width:56px;border-radius:99px;display:flex;justify-content:center;gap:6px;padding:0 10px;font-size:10px;font-weight:700}.language-toggle .icon{width:14px;height:14px}.language-toggle.is-switching .icon{animation:language-flip .4s ease}.development-banner{max-width:700px;margin:0 auto 24px;padding:14px 20px;border:1px solid #00f2c34d;border-radius:16px;background:linear-gradient(120deg,#00f2c30e,#00d2ff08);box-shadow:0 0 35px #00f2c307}.development-banner strong{display:block;font-size:clamp(23px,3vw,35px);letter-spacing:1.6px;line-height:1.3;color:var(--mint);font-weight:800}.development-banner small{display:block;margin-top:4px;font-size:10px;color:var(--muted);letter-spacing:.4px}.developer-credit{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:15px;color:var(--muted);font-size:11px}.developer-credit a{color:var(--text);font-weight:600}.developer-credit .icon{width:14px;height:14px;color:var(--mint)}.hero-orbit{width:150px;height:110px;margin-bottom:14px}.hero{padding-top:40px}.eyebrow{margin-bottom:18px}.hero h1{font-size:clamp(40px,5.6vw,70px);margin-bottom:22px}.wake-caption{margin-bottom:15px}.hero .actions{margin-top:25px}.hero .signal-strip{margin-top:21px}.hero .micro{margin-bottom:10px}.nav-sections{gap:18px}
+    [data-theme="light"]{color-scheme:light;--bg:#F0F5F5;--panel:#FFFFFF;--mint:#007F73;--green:#078563;--cyan:#007FA9;--blue:#007DA9;--text:#142D35;--muted:#4C6670;--line:rgba(24,68,82,.16)}
+    [data-theme="light"] body::before{background:radial-gradient(ellipse at 80% 38%,#00bddd0b,transparent 52%),radial-gradient(ellipse at 24% 25%,#00bf990b,transparent 55%)}
+    [data-theme="light"] .gradient{background-image:linear-gradient(110deg,#007F73,#006DA1)}[data-theme="light"] .hero h1 .gradient{background-image:linear-gradient(110deg,#007F73,#006DA1)}
+    [data-theme="light"] .eyebrow,[data-theme="light"] .utility-button{background:#FFFFFF;color:#3B5B66}[data-theme="light"] .coming{color:#006A5D;background:#E4F6F0;border-color:#0A8F7133}
+    [data-theme="light"] .development-banner{background:linear-gradient(120deg,#dcf7ed,#e2f4fb);box-shadow:0 10px 30px #23606e08}[data-theme="light"] .hero p strong{color:#254953}[data-theme="light"] .secondary{background:#fff;color:#244D5C;border-color:#007FA944}[data-theme="light"] .micro{color:#476A74}
+    [data-theme="light"] .dashboard,[data-theme="light"] .house-scene,[data-theme="light"] .room-story,[data-theme="light"] .journey-step,[data-theme="light"] .capability{background:linear-gradient(135deg,#FFFFFF,#F0F7F8);box-shadow:0 14px 45px #24546108}
+    [data-theme="light"] .sidebar{background:#EAF2F3}[data-theme="light"] .side-label,[data-theme="light"] .side-item,[data-theme="light"] .side-bottom,[data-theme="light"] .scene-label,[data-theme="light"] .scene-note,[data-theme="light"] .room-footer,[data-theme="light"] .preview-label{color:#506E78}[data-theme="light"] .side-item.active{color:#006F61;background:linear-gradient(90deg,#00a98718,#00b7dd09);border-color:#009a7c33}[data-theme="light"] .side-bottom .row{color:#315E68}
+    [data-theme="light"] .metric{background:linear-gradient(130deg,#FFFFFF,#EAF4F5)}[data-theme="light"] .metric small{color:#496C77}[data-theme="light"] .metric small.on{color:#007B69}[data-theme="light"] .assistant{background:#F6FAFB}[data-theme="light"] .message.jarvis{background:#E4F0F1;color:#244651;border-color:#9ABEC655}[data-theme="light"] .message.user{background:#DDF4F8;color:#1D5263;border-color:#00A4C533}[data-theme="light"] .quick{background:#fff;color:#335B67;border-color:#AFC8CE}[data-theme="light"] .command-form{background:#fff;border-color:#98B9C3}[data-theme="light"] .command-form input::placeholder{color:#627E88}
+    [data-theme="light"] .floor-room{background:linear-gradient(140deg,#E1EBEF,#D5E3E8);border-color:#9AB6C0;border-bottom-color:#90ADB8;color:#385F6D}[data-theme="light"] .floor-room[aria-pressed="true"]{background:linear-gradient(130deg,#C8F1E5,#D8F3F9);border-color:#00A58D;color:#006454}[data-theme="light"] .room-tab{color:#486B77}[data-theme="light"] .room-tab[aria-pressed="true"]{color:#006C5D;background:#E0F5EE;border-color:#00947855}[data-theme="light"] .example-command{color:#235849;background:#E7F5F0}[data-theme="light"] .scenario{color:#21617A;background:#E4F4F8;border-color:#0082AB33}[data-theme="light"] .room-context select{background:#fff;color:#205E57;border-color:#81B5AE}
+    [data-theme="light"] .signal-strip,[data-theme="light"] .wake-caption,[data-theme="light"] .quick-title,[data-theme="light"] .demo-note,[data-theme="light"] .demo-tools button,[data-theme="light"] .demo-tools .hint,[data-theme="light"] .architecture-note{color:#4A6B76}[data-theme="light"] .feature-tags span,[data-theme="light"] .milestone ul{color:#3D626F}[data-theme="light"] .milestone.future .badge{color:#52737E;border-color:#7A9DAA55}[data-theme="light"] .faq-items summary{color:#234B59}[data-theme="light"] .join{background:radial-gradient(ellipse at 50% 110%,#00b89a15,transparent 65%),linear-gradient(120deg,#fff,#EAF6F6)}[data-theme="light"] .footer-brand{color:#244B58}[data-theme="light"] .footer-brand span,[data-theme="light"] .footer-note,[data-theme="light"] footer{color:#526F7A}[data-theme="light"] .back-top{background:#fff;border-color:#92C4BC}
+    @keyframes language-flip{50%{transform:rotateY(180deg)}}
+    @media(max-width:1050px){.nav-sections{gap:12px;font-size:10px}.nav-link{padding:9px 12px}.header-actions{gap:7px}}
+    @media(max-width:900px){.nav-sections{display:none}}
+    @media(max-width:520px){header>.row{gap:7px}.header-actions{gap:6px}.utility-button{width:33px;height:33px}.language-toggle{width:47px;min-width:47px;padding:0 6px;gap:4px}.language-toggle .icon{width:12px;height:12px}.header-actions .nav-link{padding:8px}.header-actions .nav-link>.icon:last-child{display:none}header .coming{display:none}.hero{padding-top:30px}.development-banner{padding:13px 10px;margin-bottom:20px}.development-banner strong{font-size:23px;letter-spacing:1px}.development-banner small{font-size:9px}.hero-orbit{height:100px;margin-bottom:12px}.hero h1{font-size:42px}.developer-credit{font-size:10px;margin-top:13px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.reveal-ready .reveal{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+  <!-- Icone SVG incorporate: il file funziona anche senza CDN di icone. -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M12 .8a11.2 11.2 0 0 0-3.54 21.83c.56.1.77-.24.77-.54v-2.1c-3.13.68-3.79-1.33-3.79-1.33-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.68.08-.68 1.13.08 1.72 1.16 1.72 1.16 1 1.72 2.63 1.22 3.27.93.1-.73.39-1.22.71-1.5-2.5-.29-5.13-1.25-5.13-5.56 0-1.23.44-2.23 1.16-3.02-.12-.29-.5-1.43.11-2.98 0 0 .95-.3 3.08 1.15a10.7 10.7 0 0 1 5.61 0c2.13-1.45 3.07-1.15 3.07-1.15.61 1.55.23 2.69.11 2.98.72.79 1.16 1.79 1.16 3.02 0 4.32-2.63 5.27-5.14 5.55.4.35.76 1.03.76 2.08v3.1c0 .3.2.65.77.54A11.2 11.2 0 0 0 12 .8Z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3Zm6 10v-7h6v7"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Zm7-1v4m-2-2h4"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2m-7 9v3m-4 0h8"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-temp" viewBox="0 0 24 24"><path d="M9 14V5a3 3 0 0 1 6 0v9a5 5 0 1 1-6 0Zm3-6v9m0 0v1"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="3"/><ellipse cx="17" cy="16" rx="3" ry="3"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 6-6 6 6 6m8-12 6 6-6 6M14 3l-4 18"/></symbol>
+    <symbol id="i-connect" viewBox="0 0 24 24"><path d="m9 15 6-6m-4-3 2-2a5 5 0 0 1 7 7l-2 2m-5 5-2 2a5 5 0 0 1-7-7l2-2"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.4 14.1A8.6 8.6 0 0 1 9.9 3.6 8.7 8.7 0 1 0 20.4 14.1Z"/></symbol>
+    <symbol id="i-language" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol>
+  </svg>
+  <a class="skip" href="#main">Vai al contenuto</a>
+  <div class="wrap">
+    <header>
+      <div class="row"><a href="#" class="brand" aria-label="JARVIS, inizio pagina"><span class="mark" aria-hidden="true"></span>JARVIS</a><span class="badge coming"><span class="dot"></span>Coming Soon</span></div>
+      <nav class="nav-sections" aria-label="Navigazione principale"><a href="#vision">La visione</a><a href="#demo">Demo</a><a href="#roadmap">Roadmap</a><a href="#faq">FAQ</a></nav>
+      <div class="header-actions"><button type="button" class="utility-button theme-toggle" id="theme-toggle" aria-label="Passa al tema chiaro" aria-pressed="false"><svg class="icon sun-icon" aria-hidden="true"><use href="#i-sun"/></svg><svg class="icon moon-icon" aria-hidden="true"><use href="#i-moon"/></svg></button><button type="button" class="utility-button language-toggle" id="language-toggle" aria-label="Cambia lingua in inglese"><svg class="icon" aria-hidden="true"><use href="#i-language"/></svg><span id="language-code">IT</span></button><a class="nav-link row" href="https://github.com/Samu3k/jarvis-everywhere" data-repository target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository (nuova scheda)"><svg class="icon github-icon" aria-hidden="true"><use href="#i-github"/></svg>GitHub Repository<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="development-banner"><strong>PROGETTO IN SVILUPPO</strong><small>Prima anteprima · Le funzionalità reali sono in costruzione</small><div class="developer-credit"><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg><span>Unico sviluppatore:</span><a href="https://github.com/Samu3k" target="_blank" rel="noopener noreferrer">Samu3k</a></div></div>
+        <div class="badge eyebrow"><span class="dot"></span>OPEN SOURCE HOME &amp; AI ASSISTANT</div>
+        <div class="hero-orbit" aria-hidden="true"><span class="orbit-ring"></span><span class="orbit-ring two"></span><div class="orb"></div></div>
+        <span class="wake-caption">“HEI JARVIS…”</span>
+        <h1 id="hero-title"><span class="gradient">Jarvis On Every.</span><br><span class="gradient">Jarvis For Every.</span></h1>
+        <p><strong>Jarvis su tutto, Jarvis per tutti.</strong> L'assistente vocale e domotico open-source pensato per portare il controllo intelligente della tua casa e della tua produttività in ogni stanza.</p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/Samu3k/jarvis-everywhere" data-repository target="_blank" rel="noopener noreferrer"><svg class="icon github-icon" aria-hidden="true"><use href="#i-github"/></svg>Esplora il Repository<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a href="#demo" class="button secondary"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>Prova la Demo Interattiva</a>
+        </div>
+        <div class="micro"><span><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg>Open source, per tutti</span><span><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg>Pensato per Home Assistant</span></div>
+        <div class="signal-strip" aria-label="Le tre anime del progetto"><span><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg>LA TUA VOCE</span><i aria-hidden="true"></i><span><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg>LA TUA CASA</span><i aria-hidden="true"></i><span><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>LE TUE IDEE</span></div>
+      </section>
+      <section id="vision" class="content-section reveal" aria-labelledby="vision-title">
+        <div class="section-intro"><div><p class="section-kicker">01 / UNA VOCE, OGNI STANZA</p><h2 id="vision-title" class="section-heading">Non devi cercarlo.<br><span class="gradient">Devi solo chiamarlo.</span></h2></div><p class="section-copy">L’idea è semplice: poter dire «Hei Jarvis» quasi ovunque in casa. Dalla musica in cucina a una bozza email in studio, un unico assistente che ti accompagna.</p></div>
+        <div class="room-layout">
+          <div class="house-scene"><div class="scene-label"><span>JARVIS / HOME NETWORK</span><span>CONCEPT MULTIROOM</span></div><div class="floorplan" role="group" aria-label="Scegli una stanza della casa">
+            <button type="button" class="floor-room" data-room="salotto" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg>Salotto</button>
+            <button type="button" class="floor-room" data-room="cucina" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-music"/></svg>Cucina</button>
+            <button type="button" class="floor-room" data-room="studio" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg>Studio</button>
+            <button type="button" class="floor-room" data-room="camera" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>Camera</button>
+          </div><p class="scene-note">Seleziona una stanza e scopri un possibile utilizzo.</p></div>
+          <div class="room-story"><div class="room-tabs" role="group" aria-label="Stanze disponibili"><button class="room-tab" type="button" data-room="salotto" aria-pressed="true">Salotto</button><button class="room-tab" type="button" data-room="cucina" aria-pressed="false">Cucina</button><button class="room-tab" type="button" data-room="studio" aria-pressed="false">Studio</button><button class="room-tab" type="button" data-room="camera" aria-pressed="false">Camera</button></div><h3 id="room-title">Il comfort, a voce.</h3><p id="room-description">Ti accomodi sul divano. Jarvis si occupa del clima, mentre tu ti godi il tuo spazio.</p><div class="example-command" id="room-example">“Hei Jarvis, imposta il clima a 22 gradi in salotto.”</div><button type="button" class="button secondary" id="try-room">Prova questo comando<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button><span class="room-footer">Scenario illustrativo · Provalo nella demo qui sotto</span></div>
+        </div>
+      </section>
+      <section id="demo" class="demo-section" aria-labelledby="demo-title">
+        <div class="demo-intro reveal"><p class="section-kicker">02 / PROVALO, ADESSO</p><h2 id="demo-title" class="section-heading">Un’idea che puoi già <span class="gradient">toccare.</span></h2><p class="section-copy">Scegli una stanza, invia un comando e guarda la dashboard cambiare. Una dimostrazione dell’esperienza che vogliamo costruire, interamente nel tuo browser.</p></div>
+        <div class="scenario-row"><button type="button" class="scenario" data-scenario="relax">↗ Scenario: serata relax</button><button type="button" class="scenario" data-scenario="work">↗ Scenario: modalità lavoro</button></div>
+        <div class="section-top"><h3 style="font-size:13px;margin:0;font-weight:500">Anteprima di Jarvis</h3><p>Interattiva · Dati simulati</p></div>
+        <div class="dashboard">
+          <!-- La barra laterale illustra il prodotto; i comandi attivi sono nella chat. -->
+          <aside class="sidebar" aria-label="Panoramica della dashboard simulata">
+            <div class="brand"><span class="mark" aria-hidden="true"></span>JARVIS</div>
+            <p class="side-label">IL TUO SPAZIO</p>
+            <div class="side-item active"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>Panoramica</div>
+            <div class="side-item"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg>Casa intelligente</div>
+            <div class="side-item"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>Produttività</div>
+            <div class="side-bottom"><div class="row"><span class="dot"></span>Ambiente demo</div>Dati e connessioni simulati</div>
+          </aside>
+          <div class="workspace">
+            <div class="dashboard-top"><div><h3>Benvenuto a casa.</h3><p>Un piccolo assaggio di ciò che verrà.</p></div><span class="preview-label">LIVE PREVIEW</span></div>
+            <div class="room-context"><label for="demo-room">Stanza selezionata</label><select id="demo-room"><option value="salotto">Salotto</option><option value="cucina">Cucina</option><option value="studio">Studio</option><option value="camera">Camera</option></select></div>
+            <div class="metrics" aria-label="Dati dimostrativi">
+              <div class="metric"><div class="metric-top"><span id="climate-label">Clima salotto</span><svg class="icon" aria-hidden="true"><use href="#i-temp"/></svg></div><strong id="climate-value">21.5°C</strong><small id="climate-detail">Condizionatore spento</small></div>
+              <div class="metric"><div class="metric-top">Home Assistant<svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></div><strong id="home-value">Online</strong><small class="on" id="home-detail">Connessione simulata</small></div>
+              <div class="metric"><div class="metric-top">Il tuo spazio<svg class="icon" aria-hidden="true"><use href="#i-music"/></svg></div><strong id="space-value">In pausa</strong><small id="space-detail">Nessuna musica in coda</small></div>
+            </div>
+            <div class="assistant" aria-busy="false" id="assistant">
+              <div class="assistant-top"><span class="assistant-title"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>Il tuo assistente personale</span><span class="status"><span class="dot"></span><span id="status" role="status">Pronto ad aiutarti</span></span></div>
+              <div class="audio" id="wave" aria-hidden="true"></div>
+              <div class="conversation" id="conversation" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversazione con Jarvis"><p class="message jarvis"><b>JARVIS</b>Ciao! Sono Jarvis. Scegli una stanza e chiedimi di gestire clima, musica o una bozza email. Puoi anche provare uno scenario completo.</p></div>
+              <p class="quick-title">PROVA UN COMANDO</p>
+              <div class="quick-commands" aria-label="Comandi rapidi">
+                <button class="quick" type="button" data-command="Accendi condizionatore"><svg class="icon" aria-hidden="true"><use href="#i-temp"/></svg>Accendi condizionatore</button>
+                <button class="quick" type="button" data-command="Metti musica"><svg class="icon" aria-hidden="true"><use href="#i-music"/></svg>Metti musica</button>
+                <button class="quick" type="button" data-command="Scrivi una bozza email"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg>Scrivi una bozza email</button>
+                <button class="quick" type="button" data-command="Stato Home Assistant"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg>Stato Home Assistant</button>
+              </div>
+              <form id="command-form" class="command-form"><input id="command-input" aria-label="Scrivi un comando per Jarvis" placeholder="Chiedi qualcosa a Jarvis…" maxlength="300" autocomplete="off" required><button class="send" type="submit" aria-label="Invia comando"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button></form>
+              <div class="demo-tools"><span class="hint">Prova anche: «Hei Jarvis, serata relax»</span><button type="button" id="reset-demo">↺ Reimposta demo</button></div>
+            </div>
+            <p class="demo-note">Demo interattiva simulata · Nessun microfono attivo · Nessun dispositivo reale collegato</p>
+          </div>
+        </div>
+        <div class="principles">
+          <article class="principle"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg><div><h3>La casa, in ascolto.</h3><p>Un progetto per avvicinare voce e domotica, con Home Assistant al centro.</p></div></article>
+          <article class="principle"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><div><h3>Spazio alle tue idee.</h3><p>Dalla casa ai task quotidiani: un assistente pensato anche per la produttività.</p></div></article>
+          <article class="principle"><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg><div><h3>Aperto, per costruire insieme.</h3><p>Segui lo sviluppo su GitHub e contribuisci a dare forma al futuro di Jarvis.</p></div></article>
+        </div>
+      </section>
+      <section class="content-section reveal" id="how-it-works" aria-labelledby="how-title"><p class="section-kicker">03 / DALLA VOCE ALL’AZIONE</p><h2 class="section-heading" id="how-title">Quattro passaggi.<br><span class="gradient">Un’esperienza naturale.</span></h2><p class="section-copy">La direzione del progetto: unire punti voce nelle stanze, un assistente centrale e gli strumenti che usi già.</p><div class="journey">
+        <article class="journey-step"><span class="step-number">01 — ATTIVA</span><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><h3>«Hei Jarvis»</h3><p>Un punto voce nella stanza riconosce il richiamo e raccoglie la tua richiesta.</p></article>
+        <article class="journey-step"><span class="step-number">02 — COMPRENDI</span><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><h3>Una richiesta, un intento</h3><p>L’assistente interpreta quello che chiedi e individua l’azione da eseguire.</p></article>
+        <article class="journey-step"><span class="step-number">03 — CONNETTI</span><svg class="icon" aria-hidden="true"><use href="#i-connect"/></svg><h3>Gli strumenti giusti</h3><p>Home Assistant per la casa. Integrazioni dedicate per musica, email e produttività.</p></article>
+        <article class="journey-step"><span class="step-number">04 — RISPONDI</span><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><h3>Il risultato, con te</h3><p>Una risposta nella stanza da cui hai parlato, per continuare senza interromperti.</p></article>
+      </div><p class="architecture-note">Architettura proposta: hardware, modelli vocali e integrazioni saranno definiti durante lo sviluppo.</p></section>
+      <section id="roadmap" class="content-section reveal" aria-labelledby="roadmap-title"><div class="section-intro"><div><p class="section-kicker">04 / COSTRUIAMOLO INSIEME</p><h2 class="section-heading" id="roadmap-title">Una visione chiara.<br><span class="gradient">Un passo alla volta.</span></h2></div><p class="section-copy">Questa è la direzione, senza scadenze inventate. Il sito è il primo passo; il motore dell’assistente è ancora da costruire.</p></div><div class="roadmap">
+        <article class="milestone"><span class="badge"><span class="dot"></span>ORA / ANTEPRIMA</span><h3>Rendere concreta l’idea</h3><p>Una landing page e una demo per esplorare l’esperienza e raccogliere idee.</p><ul><li>Sito e demo simulata</li><li>Scenari multiroom</li><li>Documentazione iniziale</li></ul></article>
+        <article class="milestone future"><span class="badge">PROSSIMO / PROTOTIPO</span><h3>La prima azione reale</h3><p>Validare il percorso da un comando vocale a un dispositivo di Home Assistant.</p><ul><li>Scelta dello stack voce</li><li>Collegamento Home Assistant</li><li>Primo punto voce</li></ul></article>
+        <article class="milestone future"><span class="badge">POI / ESPANSIONE</span><h3>Jarvis, in ogni stanza</h3><p>Estendere il prototipo a più ambienti e introdurre strumenti di produttività.</p><ul><li>Gestione multiroom</li><li>Musica e bozze email</li><li>Installazione documentata</li></ul></article>
+      </div></section>
+      <section id="faq" class="content-section reveal" aria-labelledby="faq-title"><div class="faq-layout"><div><p class="section-kicker">05 / PRIMA DI INIZIARE</p><h2 class="section-heading" id="faq-title">Qualche risposta.<br><span class="gradient">Tutta la trasparenza.</span></h2><p class="section-copy">Un progetto agli inizi, con un obiettivo grande e spazio per contribuire.</p></div><div class="faq-items">
+        <details><summary>Jarvis funziona già con la mia casa?</summary><p>Al momento è disponibile la demo nel browser. Non è collegata alla tua installazione di Home Assistant: il controllo reale dei dispositivi è un obiettivo del prototipo.</p></details>
+        <details><summary>Devo installare un dispositivo in ogni stanza?</summary><p>L’idea è distribuire punti voce nelle stanze che vuoi coprire. Numero, hardware e configurazione verranno scelti e documentati durante i primi test.</p></details>
+        <details><summary>Questa pagina ascolta il mio microfono?</summary><p>No. I comandi si provano scrivendo o cliccando. La forma d’onda è un’animazione: non registra, non attiva il microfono e non riproduce audio.</p></details>
+        <details><summary>Serviranno servizi cloud o funzionerà in locale?</summary><p>Lo stack non è ancora definito. Il README distingue ciò che esiste oggi dalle scelte aperte, inclusi elaborazione vocale, modelli AI, privacy e integrazioni esterne.</p></details>
+        <details><summary>Come posso seguire o contribuire?</summary><p>Il codice del progetto è su <a href="https://github.com/Samu3k/jarvis-everywhere" data-repository target="_blank" rel="noopener noreferrer">Samu3k/jarvis-everywhere</a>. Puoi seguire gli aggiornamenti, proporre casi d’uso e discutere le scelte tecniche nelle issue.</p></details>
+      </div></div></section>
+      <section class="join reveal" aria-labelledby="join-title"><span class="badge coming"><span class="dot"></span>Un progetto di Samu3k · Coming Soon</span><h2 class="section-heading" id="join-title">Il prossimo «Hei Jarvis»<br><span class="gradient">potrebbe essere il tuo.</span></h2><p class="section-copy">Stiamo immaginando un assistente aperto, presente in casa e utile ogni giorno. Segui l’idea, prova la demo e aiutaci a darle forma.</p><div class="actions"><a class="button primary" href="https://github.com/Samu3k/jarvis-everywhere" data-repository target="_blank" rel="noopener noreferrer"><svg class="icon github-icon" aria-hidden="true"><use href="#i-github"/></svg>Segui il progetto su GitHub<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a><a href="#demo" class="button secondary">Torna alla demo</a></div></section>
+    </main>
+    <footer><div class="footer-brand">JARVIS <span>— Open Source Project</span></div><div class="footer-links"><a href="#vision">La visione</a><a href="#roadmap">Roadmap</a><a href="https://github.com/Samu3k/jarvis-everywhere" data-repository target="_blank" rel="noopener noreferrer">GitHub ↗</a></div><p class="footer-note">Progetto di Samu3k · Fase iniziale / Coming Soon · Jarvis On Every. Jarvis For Every.</p></footer>
+  </div>
+  <a href="#main" class="back-top" id="back-top" aria-label="Torna all’inizio"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+  <script>
+'use strict';
+// Un solo indirizzo per tutti i collegamenti alla repository.
+const GITHUB_URL = 'https://github.com/Samu3k/jarvis-everywhere';
+document.querySelectorAll('[data-repository]').forEach(link => { link.href = GITHUB_URL; });
+const EN = {
+  "Vai al contenuto": "Skip to content",
+  "La visione": "The vision",
+  "PROGETTO IN SVILUPPO": "PROJECT IN DEVELOPMENT",
+  "Prima anteprima · Le funzionalità reali sono in costruzione": "Early preview · Real features are being built",
+  "“HEI JARVIS…”": "“HEY JARVIS…”",
+  "Jarvis su tutto, Jarvis per tutti.": "Jarvis on everything, Jarvis for everyone.",
+  "L'assistente vocale e domotico open-source pensato per portare il controllo intelligente della tua casa e della tua produttività in ogni stanza.": "The open-source voice and home assistant designed to bring smart control of your home and productivity into every room.",
+  "Unico sviluppatore:": "Sole developer:",
+  "Esplora il Repository": "Explore the Repository",
+  "Prova la Demo Interattiva": "Try the Interactive Demo",
+  "Open source, per tutti": "Open source, for everyone",
+  "Pensato per Home Assistant": "Designed for Home Assistant",
+  "LA TUA VOCE": "YOUR VOICE",
+  "LA TUA CASA": "YOUR HOME",
+  "LE TUE IDEE": "YOUR IDEAS",
+  "01 / UNA VOCE, OGNI STANZA": "01 / ONE VOICE, EVERY ROOM",
+  "Non devi cercarlo.": "No need to look for it.",
+  "Devi solo chiamarlo.": "Just call its name.",
+  "L’idea è semplice: poter dire «Hei Jarvis» quasi ovunque in casa. Dalla musica in cucina a una bozza email in studio, un unico assistente che ti accompagna.": "The idea is simple: say “Hey Jarvis” almost anywhere at home. From music in the kitchen to an email draft in the study, one assistant that stays with you.",
+  "CONCEPT MULTIROOM": "MULTIROOM CONCEPT",
+  "Salotto": "Living room",
+  "Cucina": "Kitchen",
+  "Studio": "Study",
+  "Camera": "Bedroom",
+  "Seleziona una stanza e scopri un possibile utilizzo.": "Select a room and explore a possible use case.",
+  "Prova questo comando": "Try this command",
+  "Scenario illustrativo · Provalo nella demo qui sotto": "Illustrative scenario · Try it in the demo below",
+  "02 / PROVALO, ADESSO": "02 / TRY IT, RIGHT NOW",
+  "Un’idea che puoi già": "An idea you can already",
+  "toccare.": "interact with.",
+  "Scegli una stanza, invia un comando e guarda la dashboard cambiare. Una dimostrazione dell’esperienza che vogliamo costruire, interamente nel tuo browser.": "Choose a room, send a command and watch the dashboard change. A glimpse of the experience we want to build, running entirely in your browser.",
+  "↗ Scenario: serata relax": "↗ Scenario: relax evening",
+  "↗ Scenario: modalità lavoro": "↗ Scenario: work mode",
+  "Anteprima di Jarvis": "Jarvis preview",
+  "Interattiva · Dati simulati": "Interactive · Simulated data",
+  "IL TUO SPAZIO": "YOUR SPACE",
+  "Panoramica": "Overview",
+  "Casa intelligente": "Smart home",
+  "Produttività": "Productivity",
+  "Ambiente demo": "Demo environment",
+  "Dati e connessioni simulati": "Simulated data and connections",
+  "Benvenuto a casa.": "Welcome home.",
+  "Un piccolo assaggio di ciò che verrà.": "A little taste of what’s to come.",
+  "Stanza selezionata": "Selected room",
+  "Connessione simulata": "Simulated connection",
+  "Il tuo spazio": "Your space",
+  "Il tuo assistente personale": "Your personal assistant",
+  "PROVA UN COMANDO": "TRY A COMMAND",
+  "Accendi condizionatore": "Turn on air conditioning",
+  "Metti musica": "Play music",
+  "Scrivi una bozza email": "Write an email draft",
+  "Stato Home Assistant": "Home Assistant status",
+  "Prova anche: «Hei Jarvis, serata relax»": "Also try: “Hey Jarvis, relax evening”",
+  "↺ Reimposta demo": "↺ Reset demo",
+  "Demo interattiva simulata · Nessun microfono attivo · Nessun dispositivo reale collegato": "Simulated interactive demo · No microphone access · No real devices connected",
+  "La casa, in ascolto.": "A home that listens.",
+  "Un progetto per avvicinare voce e domotica, con Home Assistant al centro.": "Bringing voice and home automation together, with Home Assistant at the centre.",
+  "Spazio alle tue idee.": "Room for your ideas.",
+  "Dalla casa ai task quotidiani: un assistente pensato anche per la produttività.": "From your home to everyday tasks: an assistant designed for productivity too.",
+  "Aperto, per costruire insieme.": "Open, to build together.",
+  "Segui lo sviluppo su GitHub e contribuisci a dare forma al futuro di Jarvis.": "Follow development on GitHub and help shape the future of Jarvis.",
+  "03 / DALLA VOCE ALL’AZIONE": "03 / FROM VOICE TO ACTION",
+  "Quattro passaggi.": "Four steps.",
+  "Un’esperienza naturale.": "One natural experience.",
+  "La direzione del progetto: unire punti voce nelle stanze, un assistente centrale e gli strumenti che usi già.": "Our direction: connect voice endpoints in your rooms, a central assistant and the tools you already use.",
+  "01 — ATTIVA": "01 — WAKE",
+  "«Hei Jarvis»": "“Hey Jarvis”",
+  "Un punto voce nella stanza riconosce il richiamo e raccoglie la tua richiesta.": "A voice endpoint in the room recognises the wake phrase and captures your request.",
+  "02 — COMPRENDI": "02 — UNDERSTAND",
+  "Una richiesta, un intento": "One request, one intent",
+  "L’assistente interpreta quello che chiedi e individua l’azione da eseguire.": "The assistant interprets your request and identifies the action to take.",
+  "03 — CONNETTI": "03 — CONNECT",
+  "Gli strumenti giusti": "The right tools",
+  "Home Assistant per la casa. Integrazioni dedicate per musica, email e produttività.": "Home Assistant for your home. Dedicated integrations for music, email and productivity.",
+  "04 — RISPONDI": "04 — RESPOND",
+  "Il risultato, con te": "The result, right there",
+  "Una risposta nella stanza da cui hai parlato, per continuare senza interromperti.": "A response in the room you spoke from, so you can carry on without interruption.",
+  "Architettura proposta: hardware, modelli vocali e integrazioni saranno definiti durante lo sviluppo.": "Proposed architecture: hardware, voice models and integrations will be defined during development.",
+  "04 / COSTRUIAMOLO INSIEME": "04 / LET’S BUILD IT TOGETHER",
+  "Una visione chiara.": "A clear vision.",
+  "Un passo alla volta.": "One step at a time.",
+  "Questa è la direzione, senza scadenze inventate. Il sito è il primo passo; il motore dell’assistente è ancora da costruire.": "This is our direction, without made-up deadlines. The website is the first step; the assistant engine is still to be built.",
+  "ORA / ANTEPRIMA": "NOW / PREVIEW",
+  "Rendere concreta l’idea": "Make the idea tangible",
+  "Una landing page e una demo per esplorare l’esperienza e raccogliere idee.": "A landing page and demo to explore the experience and gather ideas.",
+  "Sito e demo simulata": "Website and simulated demo",
+  "Scenari multiroom": "Multiroom scenarios",
+  "Documentazione iniziale": "Initial documentation",
+  "PROSSIMO / PROTOTIPO": "NEXT / PROTOTYPE",
+  "La prima azione reale": "The first real action",
+  "Validare il percorso da un comando vocale a un dispositivo di Home Assistant.": "Validate the journey from a voice command to a Home Assistant device.",
+  "Scelta dello stack voce": "Voice stack selection",
+  "Collegamento Home Assistant": "Home Assistant connection",
+  "Primo punto voce": "First voice endpoint",
+  "POI / ESPANSIONE": "LATER / EXPANSION",
+  "Jarvis, in ogni stanza": "Jarvis, in every room",
+  "Estendere il prototipo a più ambienti e introdurre strumenti di produttività.": "Expand the prototype to more rooms and introduce productivity tools.",
+  "Gestione multiroom": "Multiroom support",
+  "Musica e bozze email": "Music and email drafts",
+  "Installazione documentata": "Documented installation",
+  "05 / PRIMA DI INIZIARE": "05 / BEFORE YOU START",
+  "Qualche risposta.": "A few answers.",
+  "Tutta la trasparenza.": "Complete transparency.",
+  "Un progetto agli inizi, con un obiettivo grande e spazio per contribuire.": "An early-stage project with a big goal and room to contribute.",
+  "Jarvis funziona già con la mia casa?": "Does Jarvis already work with my home?",
+  "Al momento è disponibile la demo nel browser. Non è collegata alla tua installazione di Home Assistant: il controllo reale dei dispositivi è un obiettivo del prototipo.": "The browser demo is available now. It is not connected to your Home Assistant installation: real device control is a prototype milestone.",
+  "Devo installare un dispositivo in ogni stanza?": "Do I need a device in every room?",
+  "L’idea è distribuire punti voce nelle stanze che vuoi coprire. Numero, hardware e configurazione verranno scelti e documentati durante i primi test.": "The idea is to place voice endpoints in the rooms you want to cover. Their number, hardware and setup will be chosen and documented during initial testing.",
+  "Questa pagina ascolta il mio microfono?": "Does this page listen to my microphone?",
+  "No. I comandi si provano scrivendo o cliccando. La forma d’onda è un’animazione: non registra, non attiva il microfono e non riproduce audio.": "No. Try commands by typing or clicking. The waveform is an animation: it does not record, activate the microphone or play audio.",
+  "Serviranno servizi cloud o funzionerà in locale?": "Will it use cloud services or run locally?",
+  "Lo stack non è ancora definito. Il README distingue ciò che esiste oggi dalle scelte aperte, inclusi elaborazione vocale, modelli AI, privacy e integrazioni esterne.": "The stack has not been defined yet. The README separates what exists today from open decisions, including voice processing, AI models, privacy and external integrations.",
+  "Come posso seguire o contribuire?": "How can I follow or contribute?",
+  "Il codice del progetto è su": "The project repository is",
+  ". Puoi seguire gli aggiornamenti, proporre casi d’uso e discutere le scelte tecniche nelle issue.": ". Follow updates, suggest use cases and discuss technical decisions in issues.",
+  "Un progetto di Samu3k · Coming Soon": "A project by Samu3k · Coming Soon",
+  "Il prossimo «Hei Jarvis»": "The next “Hey Jarvis”",
+  "potrebbe essere il tuo.": "could be yours.",
+  "Stiamo immaginando un assistente aperto, presente in casa e utile ogni giorno. Segui l’idea, prova la demo e aiutaci a darle forma.": "We’re imagining an open assistant that is there at home and useful every day. Follow the idea, try the demo and help bring it to life.",
+  "Segui il progetto su GitHub": "Follow the project on GitHub",
+  "Torna alla demo": "Back to the demo",
+  "Progetto di Samu3k · Fase iniziale / Coming Soon · Jarvis On Every. Jarvis For Every.": "Sole developer: Samu3k · In development / Coming Soon · Jarvis On Every. Jarvis For Every.",
+  "JARVIS, inizio pagina": "JARVIS, back to top",
+  "GitHub Repository (nuova scheda)": "GitHub Repository (new tab)",
+  "Navigazione principale": "Main navigation",
+  "Le tre anime del progetto": "The three sides of the project",
+  "Scegli una stanza della casa": "Choose a room in the house",
+  "Stanze disponibili": "Available rooms",
+  "Panoramica della dashboard simulata": "Simulated dashboard overview",
+  "Dati dimostrativi": "Demo data",
+  "Conversazione con Jarvis": "Conversation with Jarvis",
+  "Comandi rapidi": "Quick commands",
+  "Scrivi un comando per Jarvis": "Type a command for Jarvis",
+  "Chiedi qualcosa a Jarvis…": "Ask Jarvis something…",
+  "Invia comando": "Send command",
+  "Torna all’inizio": "Back to top"
+};
+const $ = id => document.getElementById(id);
+const form = $('command-form');
+const input = $('command-input');
+const conversation = $('conversation');
+const wave = $('wave');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+let language = 'it';
+let busy = false;
+let activeRoom = 'salotto';
+let statusKey = 'ready';
+const pair = (it, en) => ({it, en});
+const localize = value => typeof value === 'string' ? value : value[language];
+function readPreference(key) { try { return localStorage.getItem(key); } catch { return null; } }
+function savePreference(key, value) { try { localStorage.setItem(key, value); } catch { /* Navigazione privata: la sessione resta funzionante. */ } }
+
+const GREETING = pair(
+  'Ciao! Sono Jarvis. Scegli una stanza e chiedimi di gestire clima, musica o una bozza email. Puoi anche provare uno scenario completo.',
+  'Hi! I’m Jarvis. Choose a room and ask me to manage the climate, select music or prepare an email draft. You can also try a complete scenario.'
+);
+const statuses = {
+  ready: pair('Pronto ad aiutarti', 'Ready to help'),
+  thinking: pair('Sto elaborando…', 'Processing…'),
+  responding: pair('Jarvis sta rispondendo…', 'Jarvis is responding…'),
+  reset: pair('Demo reimpostata', 'Demo reset')
+};
+const rooms = {
+  salotto: {name: pair('Salotto', 'Living room'), aliases:['salotto','living room','lounge'], title:pair('Il comfort, a voce.', 'Comfort, by voice.'), description:pair('Ti accomodi sul divano. Jarvis si occupa del clima, mentre tu ti godi il tuo spazio.', 'Settle into the sofa. Jarvis handles the climate while you enjoy your space.'), command:pair('Hei Jarvis, imposta il clima a 22 gradi in salotto.', 'Hey Jarvis, set the climate to 22 degrees in the living room.')},
+  cucina: {name: pair('Cucina', 'Kitchen'), aliases:['cucina','kitchen'], title:pair('La tua colonna sonora.', 'Your own soundtrack.'), description:pair('Le mani sono occupate, ma la tua voce è libera. La musica che ti accompagna mentre prepari qualcosa di buono.', 'Your hands are busy, but your voice is free. Music to keep you company while you make something good.'), command:pair('Hei Jarvis, metti musica in cucina.', 'Hey Jarvis, play music in the kitchen.')},
+  studio: {name: pair('Studio', 'Study'), aliases:['studio','study','office'], title:pair('Dall’idea alla prima bozza.', 'From idea to first draft.'), description:pair('Una richiesta detta al volo diventa un punto di partenza per il tuo lavoro. Tu scegli come completarla.', 'A quick request becomes a starting point for your work. You decide how to finish it.'), command:pair('Hei Jarvis, scrivi una bozza email in studio.', 'Hey Jarvis, write an email draft in the study.')},
+  camera: {name: pair('Camera', 'Bedroom'), aliases:['camera','bedroom'], title:pair('Lascia fuori il rumore.', 'Leave the noise behind.'), description:pair('Temperatura confortevole e musica in sottofondo. Un possibile rituale serale, richiamato con poche parole.', 'A comfortable temperature and background music. A possible evening ritual, just a few words away.'), command:pair('Hei Jarvis, serata relax in camera.', 'Hey Jarvis, relax evening in the bedroom.')}
+};
+const freshState = () => ({temperature:'21.5',climate:false,music:false,drafts:0});
+const roomState = Object.fromEntries(Object.keys(rooms).map(key => [key, freshState()]));
+const history = [{author:'jarvis',text:GREETING}];
+
+// Conserva il testo italiano originale. Le icone, i comandi dell’utente e i
+// componenti dinamici vengono gestiti separatamente, senza innerHTML.
+const dynamicText = '#conversation, #room-title, #room-description, #room-example, #climate-label, #climate-value, #climate-detail, #space-value, #space-detail, #status, #language-code';
+const staticNodes = [];
+const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+while (walker.nextNode()) {
+  const node = walker.currentNode;
+  if (!node.textContent.trim() || node.parentElement.closest('script, style, svg, ' + dynamicText)) continue;
+  staticNodes.push({node, source:node.textContent});
+}
+const staticAttributes = [];
+document.querySelectorAll('[aria-label], [placeholder]').forEach(element => {
+  if (element.id === 'theme-toggle' || element.id === 'language-toggle') return;
+  ['aria-label','placeholder'].forEach(attribute => {
+    if (element.hasAttribute(attribute)) staticAttributes.push({element, attribute, source:element.getAttribute(attribute)});
+  });
+});
+function updateThemeControl() {
+  const light = document.documentElement.dataset.theme === 'light';
+  $('theme-toggle').setAttribute('aria-pressed', String(light));
+  $('theme-toggle').setAttribute('aria-label', light ? localize(pair('Passa al tema scuro','Switch to dark theme')) : localize(pair('Passa al tema chiaro','Switch to light theme')));
+}
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+  savePreference('jarvis-theme', document.documentElement.dataset.theme);
+  updateThemeControl();
+}
+function setStatus(key) { statusKey = key; $('status').textContent = localize(statuses[key]); }
+function renderRoom() {
+  const room = rooms[activeRoom];
+  const state = roomState[activeRoom];
+  const name = localize(room.name);
+  $('demo-room').value = activeRoom;
+  $('climate-label').textContent = localize(pair('Clima ', 'Climate · ')) + name;
+  $('climate-value').textContent = state.temperature + '°C';
+  $('climate-detail').textContent = state.climate ? localize(pair('Clima attivo · ', 'Climate on · ')) + name : localize(pair('Condizionatore spento', 'Air conditioning off'));
+  $('space-value').textContent = state.music ? localize(pair('In ascolto', 'Selected')) : localize(pair('In pausa', 'Paused'));
+  $('space-detail').textContent = state.music ? 'Chill playlist · ' + name : localize(pair('Nessuna musica in coda','No music queued'));
+  $('room-title').textContent = localize(room.title);
+  $('room-description').textContent = localize(room.description);
+  $('room-example').textContent = '“' + localize(room.command) + '”';
+  document.querySelectorAll('[data-room]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.room === activeRoom)));
+}
+function selectRoom(key) {
+  if (!Object.prototype.hasOwnProperty.call(rooms, key)) return;
+  activeRoom = key;
+  renderRoom();
+}
+function createMessage(record) {
+  const message = document.createElement('p');
+  message.className = 'message ' + record.author;
+  const label = document.createElement('b');
+  label.textContent = record.author === 'jarvis' ? 'JARVIS' : localize(pair('TU','YOU'));
+  message.append(label, document.createTextNode(localize(record.text)));
+  return message;
+}
+function renderHistory() {
+  conversation.replaceChildren(...history.map(createMessage));
+  conversation.scrollTop = conversation.scrollHeight;
+}
+function addMessage(text, author) {
+  const record = {text, author};
+  history.push(record);
+  if (history.length > 20) { history.shift(); conversation.firstElementChild?.remove(); }
+  conversation.appendChild(createMessage(record));
+  conversation.scrollTop = conversation.scrollHeight;
+}
+function setLanguage(next) {
+  language = next === 'en' ? 'en' : 'it';
+  document.documentElement.lang = language;
+  savePreference('jarvis-language', language);
+  staticNodes.forEach(({node,source}) => {
+    const original = source.trim();
+    node.textContent = language === 'en' && EN[original] ? source.replace(original,EN[original]) : source;
+  });
+  staticAttributes.forEach(({element,attribute,source}) => element.setAttribute(attribute,language === 'en' ? (EN[source] || source) : source));
+  $('language-code').textContent = language.toUpperCase();
+  $('language-toggle').setAttribute('aria-label',localize(pair('Cambia lingua in inglese','Switch language to Italian')));
+  document.title = localize(pair('JARVIS — In sviluppo · Samu3k','JARVIS — In development · Samu3k'));
+  document.querySelector('meta[name="description"]').content = localize(pair('JARVIS, progetto in sviluppo di Samu3k: assistente vocale e domotico open-source per Home Assistant e produttività. Prova la demo.', 'JARVIS, a project in development by Samu3k: an open-source voice and home assistant for Home Assistant and productivity. Try the demo.'));
+  updateThemeControl();
+  renderRoom();
+  renderHistory();
+  setStatus(statusKey);
+}
+$('theme-toggle').addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'));
+$('language-toggle').addEventListener('click', () => {
+  if (busy) return;
+  setLanguage(language === 'it' ? 'en' : 'it');
+  const button = $('language-toggle');
+  button.classList.remove('is-switching');
+  requestAnimationFrame(() => button.classList.add('is-switching'));
+});
+$('language-toggle').addEventListener('animationend', () => $('language-toggle').classList.remove('is-switching'));
+
+[9,14,20,13,25,34,20,41,29,47,33,22,39,52,31,42,25,37,19,30,17,23,12,18,9].forEach((height, i) => {
+  const bar = document.createElement('span');
+  bar.style.setProperty('--h', height + 'px');
+  bar.style.setProperty('--d', -(i % 7) * .1 + 's');
+  wave.appendChild(bar);
+});
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+function setBusy(value) {
+  busy = value;
+  $('assistant').setAttribute('aria-busy', String(value));
+  wave.classList.toggle('is-active', value);
+  input.readOnly = value;
+  document.querySelectorAll('[data-command], [data-scenario], [data-room], #try-room, #reset-demo, #demo-room, #language-toggle, .send').forEach(control => { control.disabled = value; });
+}
+function responseFor(command) {
+  const text = command.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const mentionedRoom = Object.keys(rooms).find(key => rooms[key].aliases.some(alias => new RegExp('\\b' + alias + '\\b').test(text)));
+  if (mentionedRoom) selectRoom(mentionedRoom);
+  const state = roomState[activeRoom];
+  const it = rooms[activeRoom].name.it;
+  const en = rooms[activeRoom].name.en;
+  if (/serata relax|relax evening/.test(text)) {
+    Object.assign(state,{climate:true,temperature:'22',music:true});
+    renderRoom();
+    return pair('Scenario “Serata relax” in ' + it + ':\n✓ Clima impostato a 22°C\n✓ Playlist chill selezionata\n\nTutto pronto per staccare. Azioni simulate, nessun audio o dispositivo reale attivato.', '“Relax evening” in the ' + en.toLowerCase() + ':\n✓ Climate set to 22°C\n✓ Chill playlist selected\n\nReady to unwind. Simulated actions: no real audio or devices activated.');
+  }
+  if (/modalita lavoro|work mode/.test(text)) {
+    state.music = false; state.drafts += 1; renderRoom();
+    return pair('Scenario “Modalità lavoro” in ' + it + ':\n✓ Musica in pausa\n✓ Bozza preparata\n\nOggetto: I prossimi passi\nCiao, possiamo confrontarci sulle priorità del progetto? Ti propongo di partire dalle attività più urgenti.\nA presto!\n\nBozza simulata, nessuna email inviata.', '“Work mode” in the ' + en.toLowerCase() + ':\n✓ Music paused\n✓ Draft prepared\n\nSubject: Next steps\nHi, can we discuss the project priorities? I suggest starting with the most urgent tasks.\nSpeak soon!\n\nSimulated draft. No email was sent.');
+  }
+  if (/home assistant|\bstato\b|\bstatus\b|dispositiv|\bdevices\b/.test(text)) {
+    return pair('Home Assistant: online nella demo.\nStanza: ' + it + '\nClima: ' + (state.climate ? state.temperature + '°C' : 'spento') + '\nMusica: ' + (state.music ? 'playlist chill selezionata' : 'in pausa') + '\nBozze preparate qui: ' + state.drafts + '\n\nDati dimostrativi; nessuna connessione alla tua casa.', 'Home Assistant: online in the demo.\nRoom: ' + en + '\nClimate: ' + (state.climate ? state.temperature + '°C' : 'off') + '\nMusic: ' + (state.music ? 'chill playlist selected' : 'paused') + '\nDrafts prepared here: ' + state.drafts + '\n\nDemo data; no connection to your home.');
+  }
+  if (/condizion|clima|riscald|temperatur|air condition|heating/.test(text)) {
+    const off = /spegni|spegne|disattiva|turn off|switch off|stop/.test(text);
+    const match = text.match(/-?\d+(?:[.,]\d+)?/);
+    const temperature = match ? Number(match[0].replace(',','.')) : 22;
+    if (!off && (temperature < 16 || temperature > 30)) return pair('Per questa demo scegli una temperatura tra 16 e 30°C. Lo stato del clima non è stato modificato.', 'Choose a temperature between 16 and 30°C for this demo. The climate settings have not changed.');
+    state.climate = !off;
+    if (!off) state.temperature = String(temperature);
+    renderRoom();
+    return off ? pair('Condizionatore spento in ' + it + '. La card conserva l’ultima temperatura impostata. (Simulazione)', 'Air conditioning off in the ' + en.toLowerCase() + '. The card keeps the last set temperature. (Simulation)') : pair('Climatizzazione impostata su ' + temperature + '°C in ' + it + '. Ambiente perfetto, ci penso io. (Simulazione)', 'Climate set to ' + temperature + '°C in the ' + en.toLowerCase() + '. A comfortable space, taken care of. (Simulation)');
+  }
+  if (/music|playlist|canzon|\bsong/.test(text)) {
+    const stop = /ferma|stop|pausa|pause|spegni|turn off/.test(text);
+    state.music = !stop; renderRoom();
+    return stop ? pair('Musica in pausa in ' + it + '. (Simulazione)', 'Music paused in the ' + en.toLowerCase() + '. (Simulation)') : pair('Playlist chill selezionata in ' + it + '. La colonna sonora giusta per il tuo momento. (Simulazione: nessun audio riprodotto)', 'Chill playlist selected in the ' + en.toLowerCase() + '. The right soundtrack for your moment. (Simulation: no audio is played)');
+  }
+  if (/email|e-mail|bozza|posta|\bdraft/.test(text)) {
+    state.drafts += 1;
+    return pair('Ecco una bozza di esempio, preparata in ' + it + ':\n\nOggetto: Aggiornamento sul progetto\n\nCiao,\nti scrivo per condividere i progressi del progetto. Possiamo fissare un momento per confrontarci sui prossimi passi?\n\nA presto!\n\nBozza simulata, nessuna email inviata.', 'Here is an example draft, prepared in the ' + en.toLowerCase() + ':\n\nSubject: Project update\n\nHi,\nI’m writing to share the progress on the project. Can we schedule some time to discuss the next steps?\n\nSpeak soon!\n\nSimulated draft. No email was sent.');
+  }
+  if (/ciao|salve|buongiorno|hello|\bhi\b/.test(text)) return pair('Ciao! Prova a chiedermi di accendere il condizionatore, mettere musica, scrivere una bozza email o controllare Home Assistant.', 'Hi! Try asking me to turn on air conditioning, play music, write an email draft or check Home Assistant.');
+  return pair('Questa anteprima riconosce clima, musica, bozze email, stato Home Assistant e gli scenari “serata relax” e “modalità lavoro”. Prova “Hei Jarvis, imposta il clima a 24 gradi in cucina”. Per richieste libere servirà il futuro motore AI.', 'This preview recognises climate, music, email drafts, Home Assistant status, and the “relax evening” and “work mode” scenarios. Try “Hey Jarvis, set the climate to 24 degrees in the kitchen”. Free-form requests will need the future AI engine.');
+}
+async function runCommand(rawCommand) {
+  const command = rawCommand.trim().slice(0,300);
+  if (!command || busy) return;
+  setBusy(true); input.value = '';
+  try {
+    addMessage(command,'user'); setStatus('thinking');
+    await wait(reducedMotion.matches ? 0 : 700);
+    setStatus('responding');
+    const response = responseFor(command);
+    await wait(reducedMotion.matches ? 0 : 650);
+    addMessage(response,'jarvis');
+  } catch {
+    addMessage(pair('La demo ha incontrato un problema. Riprova con un comando rapido.', 'The demo ran into a problem. Please try a quick command.'),'jarvis');
+  } finally { setBusy(false); setStatus('ready'); }
+}
+form.addEventListener('submit', event => { event.preventDefault(); runCommand(input.value); });
+document.querySelectorAll('[data-command]').forEach(button => button.addEventListener('click', () => runCommand(language === 'en' ? EN[button.dataset.command] : button.dataset.command)));
+document.querySelectorAll('[data-room]').forEach(button => button.addEventListener('click', () => { if (!busy) selectRoom(button.dataset.room); }));
+$('demo-room').addEventListener('change', event => { if (!busy) selectRoom(event.target.value); });
+$('try-room').addEventListener('click', () => {
+  if (busy) return;
+  $('demo').scrollIntoView({behavior:reducedMotion.matches ? 'auto' : 'smooth',block:'start'});
+  runCommand(localize(rooms[activeRoom].command));
+});
+document.querySelectorAll('[data-scenario]').forEach(button => button.addEventListener('click', () => {
+  if (busy) return;
+  runCommand(button.dataset.scenario === 'relax' ? localize(pair('Hei Jarvis, serata relax','Hey Jarvis, relax evening')) : localize(pair('Hei Jarvis, modalità lavoro','Hey Jarvis, work mode')));
+}));
+$('reset-demo').addEventListener('click', () => {
+  if (busy) return;
+  Object.values(roomState).forEach(state => Object.assign(state,freshState()));
+  selectRoom('salotto'); history.length = 0; history.push({author:'jarvis',text:GREETING});
+  renderHistory(); input.value = ''; setStatus('reset');
+});
+if ('IntersectionObserver' in window) {
+  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    entry.target.classList.add('in-view'); observer.unobserve(entry.target);
+  }), {threshold:.08});
+  document.querySelectorAll('.reveal').forEach(section => observer.observe(section));
+  document.documentElement.classList.add('reveal-ready');
+}
+let scrollScheduled = false;
+function updateScroll() {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  $('scroll-progress').style.width = (max > 0 ? Math.min(100,Math.max(0,window.scrollY/max*100)) : 0) + '%';
+  const show = window.scrollY > 700;
+  $('back-top').classList.toggle('visible',show); $('back-top').tabIndex = show ? 0 : -1;
+  scrollScheduled = false;
+}
+window.addEventListener('scroll', () => { if (!scrollScheduled) { scrollScheduled = true; requestAnimationFrame(updateScroll); } }, {passive:true});
+window.addEventListener('resize',updateScroll);
+setLanguage(readPreference('jarvis-language') === 'en' ? 'en' : 'it');
+updateScroll();
+
+  </script>
+</body>
+</html>
